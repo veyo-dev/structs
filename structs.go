@@ -12,23 +12,29 @@ var (
 	// a more granular to tweak certain structs. Lookup the necessary functions
 	// for more info.
 	DefaultTagName = "structs" // struct's field default tag name
+	// DefaultFlattenTagOpt is the tag option name for inlining embedded struct fields
+	// Provides opt-in compatibility with popular encoding libraries such as
+	// encode/json (`json:",inline"`) or mapstructure (`mapstructure:",squash"`)
+	DefaultFlattenTagOption = "flatten"
 )
 
 // Struct encapsulates a struct type to provide several high level functions
 // around the struct.
 type Struct struct {
-	raw     interface{}
-	value   reflect.Value
-	TagName string
+	raw              interface{}
+	value            reflect.Value
+	TagName          string
+	FlattenTagOption string
 }
 
 // New returns a new *Struct with the struct s. It panics if the s's kind is
 // not struct.
 func New(s interface{}) *Struct {
 	return &Struct{
-		raw:     s,
-		value:   strctVal(s),
-		TagName: DefaultTagName,
+		raw:              s,
+		value:            strctVal(s),
+		TagName:          DefaultTagName,
+		FlattenTagOption: DefaultFlattenTagOption,
 	}
 }
 
@@ -139,7 +145,7 @@ func (s *Struct) FillMap(out map[string]interface{}) {
 			continue
 		}
 
-		if isSubStruct && (tagOpts.Has("flatten")) {
+		if isSubStruct && (tagOpts.Has(s.FlattenTagOption)) {
 			for k := range finalVal.(map[string]interface{}) {
 				out[k] = finalVal.(map[string]interface{})[k]
 			}
