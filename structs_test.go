@@ -611,7 +611,34 @@ func TestMap_FlatnestedCustomOption(t *testing.T) {
 	if !reflect.DeepEqual(m, expectedMap) {
 		t.Errorf("The exprected map %+v does't correspond to %+v", expectedMap, m)
 	}
+}
 
+func TestMap_FlatnestedInConfig(t *testing.T) {
+	type A struct {
+		Name string
+	}
+	a := A{Name: "example"}
+
+	type B struct {
+		A
+		C int
+	}
+	b := &B{C: 123}
+	b.A = a
+
+	s := New(b)
+	s.Flatten = true
+	m := s.Map()
+
+	_, ok := m["A"].(map[string]interface{})
+	if ok {
+		t.Error("Embedded A struct has to be flat in the map when enabled in config")
+	}
+
+	expectedMap := map[string]interface{}{"Name": "example", "C": 123}
+	if !reflect.DeepEqual(m, expectedMap) {
+		t.Errorf("The exprected map %+v does't correspond to %+v", expectedMap, m)
+	}
 }
 
 func TestMap_FlatnestedOverwrite(t *testing.T) {

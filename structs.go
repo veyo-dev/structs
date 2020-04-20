@@ -24,6 +24,7 @@ type Struct struct {
 	raw              interface{}
 	value            reflect.Value
 	TagName          string
+	Flatten          bool
 	FlattenTagOption string
 }
 
@@ -145,7 +146,7 @@ func (s *Struct) FillMap(out map[string]interface{}) {
 			continue
 		}
 
-		if isSubStruct && (tagOpts.Has(s.FlattenTagOption)) {
+		if isSubStruct && (s.Flatten || tagOpts.Has(s.FlattenTagOption)) {
 			for k := range finalVal.(map[string]interface{}) {
 				out[k] = finalVal.(map[string]interface{})[k]
 			}
